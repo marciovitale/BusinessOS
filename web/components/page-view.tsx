@@ -43,6 +43,8 @@ export async function PageView({
       <CardGrid
         cards={cards}
         view={mode}
+        pillar={pillar}
+        page={page}
         empty={
           <EmptyState
             title={`Comece a preencher “${def.title}”`}

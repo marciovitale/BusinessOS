@@ -5,7 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { PillarDef, PillarSummary, PageSummary } from "@/lib/types";
+import type { PageDef, PageSummary } from "@/lib/types";
+
+// Forma estrutural mínima aceita pelo NavGroup — cobre PillarDef/PillarSummary
+// (pilares de negócio) e também grupos avulsos como "Sistema".
+type NavGroupSection = {
+  title: string;
+  pages: (PageDef | PageSummary)[];
+};
 
 // Um link de navegação com destaque de item ativo (usePathname).
 export function NavLink({
@@ -50,7 +57,7 @@ export function NavGroup({
   pillar,
   onNavigate,
 }: {
-  pillar: PillarDef | PillarSummary;
+  pillar: NavGroupSection;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();

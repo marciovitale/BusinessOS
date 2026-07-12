@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { PageHeader } from "@/components/page-header";
-import { ContentCard } from "@/components/content-card";
+import { RecentCardRow } from "@/components/recent-card-row";
+import { ContextLintPanel } from "@/components/context-lint-panel";
 import { getAllCards, getPillars } from "@/lib/content";
 
 export default async function Home() {
@@ -99,6 +100,8 @@ export default async function Home() {
         })}
       </section>
 
+      <ContextLintPanel />
+
       {/* Continue de onde parou */}
       {recent.length > 0 ? (
         <section className="flex flex-col gap-3">
@@ -107,7 +110,7 @@ export default async function Home() {
           </h2>
           <div className="flex flex-col gap-2">
             {recent.map((card) => (
-              <ContentCard key={`${card.pillar}/${card.page}/${card.id}`} card={card} view="list" />
+              <RecentCardRow key={`${card.pillar}/${card.page}/${card.id}`} card={card} />
             ))}
           </div>
         </section>

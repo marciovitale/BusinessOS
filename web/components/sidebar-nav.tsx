@@ -1,6 +1,12 @@
 import { NavGroup, NavLink } from "@/components/nav-group";
 import type { PillarSummary } from "@/lib/types";
 
+// Grupo avulso (fora dos 4 pilares de negócio) com as páginas de sistema do BusinessOS.
+const SYSTEM_GROUP = {
+  title: "Sistema",
+  pages: [{ slug: "agentes", title: "Agentes", route: "/agentes" }],
+};
+
 // Conteúdo compartilhado da navegação (desktop + drawer mobile).
 // Sem "use client" e sem imports server-only: renderiza em ambos os contextos.
 export function SidebarNav({
@@ -18,6 +24,7 @@ export function SidebarNav({
       {pillars.map((pillar) => (
         <NavGroup key={pillar.slug} pillar={pillar} onNavigate={onNavigate} />
       ))}
+      <NavGroup pillar={SYSTEM_GROUP} onNavigate={onNavigate} />
     </nav>
   );
 }

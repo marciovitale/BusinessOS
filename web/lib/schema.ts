@@ -41,3 +41,24 @@ export const saveCardInput = z.object({
   order: z.coerce.number().int().nonnegative().default(0),
 });
 export type SaveCardInput = z.infer<typeof saveCardInput>;
+
+// Input validado da Server Action de criação (seção 9).
+// `id`/`order` NÃO vêm do cliente: o `id` (slug) é derivado do título e
+// deduplicado no servidor; `order` é calculado (maior+1) na pasta da página.
+export const createCardInput = z.object({
+  pillar: pillarEnum,
+  page: z.string().min(1),
+  title: z.string().min(1),
+  status: statusEnum.default("draft"),
+  tags: z.array(z.string()).default([]),
+  body: z.string().default(""),
+});
+export type CreateCardInput = z.infer<typeof createCardInput>;
+
+// Input validado da Server Action de exclusão (ação destrutiva).
+export const deleteCardInput = z.object({
+  pillar: pillarEnum,
+  page: z.string().min(1),
+  id: z.string().min(1),
+});
+export type DeleteCardInput = z.infer<typeof deleteCardInput>;

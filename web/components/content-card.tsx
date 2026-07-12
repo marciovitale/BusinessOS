@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
-import { cn } from "@/lib/utils";
-import type { Card as CardModel } from "@/lib/types";
+import { CardActions } from "@/components/card-actions";
+import { Markdown } from "@/components/markdown";
+import type { Card as CardModel, PillarSlug } from "@/lib/types";
 
 function Tags({ tags }: { tags: string[] }) {
   if (!tags.length) return null;
@@ -19,15 +20,34 @@ function Tags({ tags }: { tags: string[] }) {
   );
 }
 
+// Reduz Markdown a texto plano para o preview de UMA linha (modo lista).
+function toPlainText(md: string): string {
+  return md
+    .replace(/`{1,3}[^`]*`{1,3}/g, " ") // code spans/blocks
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1") // links/imagens -> texto
+    .replace(/[*_~>#-]+/g, " ") // ênfase/headings/listas/citações
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // Renderiza um Card. O layout muda por `view`:
-// - grid: título + badge + preview de ~3 linhas + tags + updated
-// - list: linha compacta (título/preview à esquerda, badge/updated à direita)
+// - grid: título + badge + preview de Markdown real (truncado) + tags + updated
+// - list: linha compacta (título/preview à esquerda, badge/updated/ações à direita)
+//
+// Compat: `card` e `view` mantêm a assinatura pública original. `pillar`/`page`
+// são props OPCIONAIS aditivas — quando ambas presentes, o card exibe as ações
+// de editar/excluir (CardActions). Sem elas, o card é puramente apresentacional
+// (ex.: stories), como antes.
 export function ContentCard({
   card,
   view = "grid",
+  pillar,
+  page,
 }: {
   card: CardModel;
   view?: "grid" | "list";
+  pillar?: PillarSlug;
+  page?: string;
 }) {
   if (view === "list") {
     return (
@@ -40,7 +60,7 @@ export function ContentCard({
           </div>
           {card.body ? (
             <p className="mt-0.5 truncate text-sm text-muted-foreground">
-              {card.body}
+              {toPlainText(card.body)}
             </p>
           ) : null}
         </div>
@@ -49,6 +69,9 @@ export function ContentCard({
           <time className="hidden text-xs text-muted-foreground sm:block">
             {card.updated}
           </time>
+          {pillar && page ? (
+            <CardActions card={card} pillar={pillar} page={page} />
+          ) : null}
         </div>
       </Card>
     );
@@ -61,19 +84,21 @@ export function ContentCard({
           <h3 className="text-base font-medium leading-snug text-foreground">
             {card.title}
           </h3>
-          <StatusBadge status={card.status} />
+          <div className="flex shrink-0 items-center gap-1">
+            <StatusBadge status={card.status} />
+            {pillar && page ? (
+              <CardActions card={card} pillar={pillar} page={page} />
+            ) : null}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {card.body ? (
-          <p
-            className={cn(
-              "text-sm text-muted-foreground",
-              "line-clamp-3 whitespace-pre-line",
-            )}
-          >
-            {card.body}
-          </p>
+          <div className="relative max-h-32 overflow-hidden">
+            <Markdown>{card.body}</Markdown>
+            {/* Fade de truncamento coerente com o fundo do card. */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-card to-transparent" />
+          </div>
         ) : (
           <p className="text-sm italic text-muted-foreground/70">
             Sem conteúdo ainda.
