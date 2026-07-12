@@ -2,7 +2,7 @@
 id: decisao-pivotar-ou-seguir
 pillar: validacao
 page: oferta
-title: Decisão: pivotar ou seguir
+title: "Decisão: pivotar ou seguir"
 status: empty
 tags: [decisao]
 order: 5

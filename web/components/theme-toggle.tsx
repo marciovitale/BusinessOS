@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 
-// Alterna entre light/dark. Evita mismatch de hidratação só renderizando
-// o ícone depois do mount (o tema real só é conhecido no client).
+// Alterna entre light/dark. Os dois ícones são sempre renderizados e a
+// visibilidade é resolvida via CSS (`dark:`), então o HTML do servidor e o
+// do client coincidem — sem estado de "mounted" nem mismatch de hidratação.
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <Button
@@ -22,11 +17,8 @@ export function ThemeToggle() {
       aria-label="Alternar tema claro/escuro"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
-      {mounted && resolvedTheme === "dark" ? (
-        <Sun className="size-4" strokeWidth={1.75} />
-      ) : (
-        <Moon className="size-4" strokeWidth={1.75} />
-      )}
+      <Sun className="hidden size-4 dark:block" strokeWidth={1.75} />
+      <Moon className="size-4 dark:hidden" strokeWidth={1.75} />
     </Button>
   );
 }

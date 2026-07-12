@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
@@ -63,10 +63,13 @@ export function NavGroup({
   const pathname = usePathname();
   const hasActivePage = pillar.pages.some((page) => page.route === pathname);
   const [open, setOpen] = useState(hasActivePage);
-
-  useEffect(() => {
+  // Ajusta o estado durante o render (sem efeito) quando a rota ativa passa a
+  // pertencer a este pilar — ex.: navegação client-side para dentro do grupo.
+  const [prevHasActivePage, setPrevHasActivePage] = useState(hasActivePage);
+  if (hasActivePage !== prevHasActivePage) {
+    setPrevHasActivePage(hasActivePage);
     if (hasActivePage) setOpen(true);
-  }, [hasActivePage]);
+  }
 
   return (
     <div className="flex flex-col gap-1">
