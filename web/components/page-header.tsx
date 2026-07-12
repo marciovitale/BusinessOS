@@ -17,23 +17,23 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
+        "flex flex-col gap-8 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between",
         className,
       )}
     >
       <div className="min-w-0">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        <div className="flex items-start gap-3">
+          <h1 className="text-4xl font-normal uppercase leading-[.92] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-7xl">
             {title}
           </h1>
           {typeof count === "number" ? (
-            <span className="rounded-md bg-muted px-2 py-0.5 text-sm font-medium text-muted-foreground">
-              {count}
+            <span className="mt-1 text-xs tabular-nums text-muted-foreground">
+              ({String(count).padStart(2, "0")})
             </span>
           ) : null}
         </div>
         {description ? (
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
             {description}
           </p>
         ) : null}

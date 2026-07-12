@@ -27,7 +27,7 @@ export async function PageView({
   const suggestions = getSuggestions(pillar, page);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 md:p-8">
+    <div className="mx-auto flex max-w-[1500px] flex-col gap-8 p-5 md:p-8 lg:p-10">
       <PageHeader
         title={def.title}
         description={def.description}

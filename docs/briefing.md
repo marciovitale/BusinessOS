@@ -139,12 +139,15 @@ Em resumo: **o formato do conteúdo é a interface entre o humano e a IA.** Escr
 
 ## 9. Direção de design
 
-- **Minimalismo preto e branco (monocromático):** fundo branco, texto quase preto, cinzas sutis. Sem cores de marca competindo pela atenção — o foco é o conteúdo do founder.
-- **Tipografia:** fonte **Inter**, limpa e neutra.
-- **Formas:** cantos arredondados (`rounded-lg` / `rounded-xl`); muito **espaço em branco** para dar respiro e calma ao pensar.
-- **Sidebar:** agrupada pelos **4 pilares**, com itens arredondados e *hover* de background sutil.
+- **Dark-first monocromático:** fundo quase preto (`#020202` como referência perceptual), texto branco e uma escala curta de cinzas. Não há cor cromática de marca competindo com o conteúdo.
+- **Linguagem editorial:** títulos amplos, leves, em caixa alta e com tracking negativo; metadados pequenos, em caixa alta e com tracking aberto. A interface deve parecer um sistema de inteligência, não um painel administrativo genérico.
+- **Tipografia:** **Inter** self-hosted, usada com peso regular como aproximação técnica de uma grotesca editorial. Hierarquia vem principalmente de escala, contraste e espaçamento — não de excesso de peso.
+- **Formas:** cards com `rounded-2xl`, botões, badges e itens ativos em cápsula (`rounded-full`), bordas brancas translúcidas e ausência de sombras decorativas.
+- **Sidebar:** trilho escuro persistente, marca dentro de uma cápsula contornada e navegação agrupada pelos **4 pilares**. O item ativo inverte o contraste (branco sobre preto → preto sobre branco).
 - **Conteúdo em cards, não tabelas:** cada informação é um card; visualização alternável entre **Grid** e **Lista** por um `Select`.
-- **Sensação-alvo:** um ambiente tranquilo, focado e opinativo — que convida a escrever e decidir com clareza, não a se perder em opções.
+- **Motion:** microinterações curtas e discretas (elevação de 2px, mudança de borda e rotação de ícone), sempre respeitando `prefers-reduced-motion`.
+- **Sensação-alvo:** premium, tecnológica, focada e opinativa — com o dramatismo visual de um site editorial aplicado à clareza de um produto de trabalho.
+- **Referência:** [Redstone Software](https://redstone.software/) / [Awwwards](https://www.awwwards.com/sites/redstone-software), usada como referência de princípios visuais. Não copiar identidade, conteúdo, assets ou composição promocional literalmente.
 
 ---
 
@@ -157,7 +160,7 @@ O MVP é bem-sucedido se:
 3. **Modelo de conteúdo íntegro:** frontmatter (`id`, `pillar`, `page`, `title`, `status`, `tags`, `order`, `updated`) é respeitado e consistente em todos os cards.
 4. **Clareza percebida:** o founder consegue enxergar, pelos status, o que já pensou e o que ainda falta em cada pilar.
 5. **Prontidão para IA:** o conteúdo gerado é limpo e estruturado o suficiente para ser agregado e carregado como contexto por um agente (validação da hipótese central do produto).
-6. **Design coerente:** a experiência entrega o padrão minimalista P&B com cards grid/lista e sidebar por pilares, de forma consistente.
+6. **Design coerente:** a experiência entrega o padrão dark-first editorial, monocromático, com cards grid/lista, cápsulas e sidebar por pilares de forma consistente.
 
 ---
 

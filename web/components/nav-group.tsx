@@ -34,10 +34,10 @@ export function NavLink({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors",
+        "flex items-center justify-between gap-2 rounded-full px-3 py-2 text-sm transition-colors",
         "hover:bg-sidebar-hover hover:text-sidebar-hover-foreground",
         active
-          ? "bg-muted font-medium text-foreground"
+          ? "bg-foreground font-medium text-background"
           : "text-muted-foreground",
       )}
     >
@@ -74,7 +74,7 @@ export function NavGroup({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="flex w-full items-center gap-1 rounded-lg px-3 pb-1 pt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground/70 transition-colors hover:text-sidebar-hover"
+        className="flex w-full items-center gap-1 rounded-lg px-3 pb-1 pt-5 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70 transition-colors hover:text-foreground"
       >
         <ChevronRight
           className={cn(

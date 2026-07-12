@@ -322,10 +322,10 @@ O que é **stub / simplificado no MVP**:
 
 ## 11. Requisitos não-funcionais
 
-- **RNF-01 · Design** — Visual **minimalista preto e branco**, fonte **Inter**, **cantos arredondados**, cards no lugar de tabelas, muito **espaço em branco**. Sidebar agrupada com hover de background e itens arredondados.
+- **RNF-01 · Design** — Visual **dark-first monocromático e editorial**, fonte **Inter**, títulos amplos de peso regular, cards no lugar de tabelas, bordas finas e bastante espaço negativo. Cards usam cantos amplos; botões, badges e itens ativos usam cápsulas. A referência de direção é a Redstone Software, sem cópia literal de marca, assets ou conteúdo.
 - **RNF-02 · Consistência de UI** — Componentes baseados em **shadcn/ui** e documentados no **Storybook**; padrões visuais consistentes entre páginas.
 - **RNF-03 · Performance** — Carregamento rápido das páginas de conteúdo; renderização eficiente das listas de cards mesmo com dezenas de cards por página.
-- **RNF-04 · Acessibilidade básica** — Contraste adequado (P&B ajuda), navegação por teclado nos controles principais (criar, editar, alternar visualização, navegar), rótulos/aria nos controles interativos e foco visível.
+- **RNF-04 · Acessibilidade básica** — Contraste adequado no tema escuro, navegação por teclado nos controles principais, rótulos/aria nos controles interativos, foco visível e microinterações condicionadas a `prefers-reduced-motion`.
 - **RNF-05 · Responsividade** — Layout utilizável em desktop e em telas estreitas; grade de cards responsiva e sidebar colapsável.
 - **RNF-06 · Manutenibilidade** — Stack **Next.js (App Router) + TypeScript + Tailwind**; código tipado e organizado por pilar/página.
 - **RNF-07 · Portabilidade de conteúdo** — Conteúdo em arquivos Markdown legíveis e versionáveis, independentes de banco de dados, facilitando backup e futura migração (Supabase).
@@ -355,7 +355,7 @@ O que é **stub / simplificado no MVP**:
 - **CA-07** — O controle **Select** alterna entre **Grade** e **Lista** sem perder dados, com Grade como padrão.
 - **CA-08** — A sidebar destaca o **item ativo**, agrupa por pilar e aplica hover arredondado.
 - **CA-09** — O conteúdo lido/gravado está em **Markdown + frontmatter YAML** com todos os campos definidos.
-- **CA-10** — O visual segue o padrão **minimalista P&B com Inter, cantos arredondados e bastante espaço em branco**.
+- **CA-10** — O visual segue o padrão **dark-first editorial e monocromático**, com Inter, títulos de grande escala, cards arredondados, controles em cápsula, linhas finas e espaço negativo generoso.
 - **CA-11** — A aplicação é **responsiva** o suficiente para uso em telas estreitas (sidebar colapsa) e faz **deploy na Vercel**.
 - **CA-12** — Não há login, banco de dados ativo nem agentes ao vivo — o MVP é single-user sobre arquivos.
 

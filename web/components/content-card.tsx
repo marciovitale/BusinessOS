@@ -51,10 +51,10 @@ export function ContentCard({
 }) {
   if (view === "list") {
     return (
-      <Card className="flex-row items-center justify-between gap-4 rounded-xl px-4 py-3">
+      <Card className="flex-row items-center justify-between gap-4 rounded-2xl px-5 py-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-sm font-medium text-foreground">
+            <h3 className="truncate text-base font-normal text-foreground">
               {card.title}
             </h3>
           </div>
@@ -78,10 +78,10 @@ export function ContentCard({
   }
 
   return (
-    <Card className="gap-3 rounded-xl">
+    <Card className="group min-h-64 gap-3 rounded-2xl">
       <CardHeader className="gap-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-medium leading-snug text-foreground">
+          <h3 className="max-w-[85%] text-xl font-normal leading-tight tracking-[-0.025em] text-foreground">
             {card.title}
           </h3>
           <div className="flex shrink-0 items-center gap-1">
@@ -105,8 +105,8 @@ export function ContentCard({
           </p>
         )}
         <Tags tags={card.tags} />
-        <time className="text-xs text-muted-foreground">
-          Atualizado em {card.updated}
+        <time className="mt-auto border-t border-border pt-3 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+          Atualizado · {card.updated}
         </time>
       </CardContent>
     </Card>

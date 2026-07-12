@@ -18,7 +18,7 @@
 1. A pasta `content/` **É** o repositório de contexto compartilhado com a IA. Nada de duplicar conteúdo em outro lugar.
 2. Server Components por padrão; Client Components só onde há interatividade (toggle de visualização, formulário de edição).
 3. Frontmatter é um contrato: sempre validado com `zod` na fronteira de leitura. Arquivo inválido não derruba a página — é degradado com aviso.
-4. Design minimalista P&B, muito espaço em branco, cantos arredondados. Nada de cor cromática (exceto sinalização semântica mínima, ver seção 7).
+4. Design dark-first, editorial e monocromático, com espaço negativo generoso, títulos amplos, cards arredondados e controles em cápsula. Nada de cor cromática (ver seção 7).
 
 ---
 
@@ -475,8 +475,8 @@ tanto o conteúdo editável na UI quanto o chunk de contexto para a IA.
 | Componente | Tipo | Props principais | Descrição |
 | --- | --- | --- | --- |
 | `AppSidebar` | Server (+ item ativo em client) | `pillars?: PillarSummary[]` | Navegação lateral persistente agrupada pelos 4 pilares. Logo/nome no topo, link "Visão geral" para `/`, depois um `NavGroup` por pilar. Envolto em `ScrollArea`. |
-| `NavGroup` (`PillarNav`) | Client | `pillar: PillarDef \| PillarSummary`, `activePath: string` | Um grupo de pilar: heading do pilar + lista de itens de página. Item = link `rounded-lg` com `hover:bg-muted`, estado ativo `bg-muted font-medium`. |
-| `PageHeader` | Server | `title: string`, `description?: string`, `count?: number`, `actions?: ReactNode` | Cabeçalho da página: título grande, subtítulo opcional, slot de ações (à direita) onde entra o `ViewToggle` e o botão "Novo card". |
+| `NavGroup` (`PillarNav`) | Client | `pillar: PillarDef \| PillarSummary`, `activePath: string` | Um grupo de pilar com label editorial em caixa alta. Links são cápsulas; o estado ativo usa contraste invertido (`bg-foreground text-background`). |
+| `PageHeader` | Server | `title: string`, `description?: string`, `count?: number`, `actions?: ReactNode` | Cabeçalho editorial com título em caixa alta e escala responsiva, contador no formato `(00)`, subtítulo e linha divisória; ações ficam alinhadas à direita/base. |
 | `ContentCard` | Server | `card: Card`, `view: "grid" \| "list"`, `onEdit?` | Renderiza um Card: `title`, `StatusBadge`, `tags`, `updated`, preview do `body`. Layout muda por `view`. Usa `Card`/`CardHeader`/`CardContent` do shadcn. Clique abre edição. |
 | `CardGrid` | Server | `cards: Card[]`, `view: "grid" \| "list"` | Renderiza a coleção. `grid` ⇒ CSS grid responsivo (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4`). `list` ⇒ `flex flex-col gap-2` (linhas densas). Se `cards.length === 0` ⇒ `EmptyState`. |
 | `ViewToggle` | Client | `value: "grid" \| "list"`, `onChange` **ou** baseado em query param | `Select` do shadcn com opções **Grid** / **Lista**. Controla o modo de visualização (seção 8). |
@@ -500,7 +500,18 @@ A **home** (`app/page.tsx`) usa `getPillars()` e mostra 4 seções (uma por pila
 
 ---
 
-## 7. Design tokens (tema P&B monocromático)
+## 7. Design tokens e look & feel (dark-first editorial)
+
+### Princípios visuais
+
+- Tema escuro fixo no produto; `#020202` é a referência perceptual do fundo.
+- Paleta estritamente monocromática. Estados são comunicados por preenchimento, contorno, peso e opacidade, nunca por matiz.
+- Títulos de página usam caixa alta, peso regular, line-height compacto e tracking negativo (`text-4xl` até `text-7xl`).
+- Labels e metadados usam caixa alta, tamanhos entre 9–10px e tracking aberto.
+- Cards usam `rounded-2xl`, fundo translúcido, borda branca de baixa opacidade e nenhuma sombra.
+- Botões, badges, marca e itens ativos usam `rounded-full`.
+- Microinterações duram cerca de 180ms; cards podem subir no máximo 2px. Respeitar `prefers-reduced-motion`.
+- Referência visual: Redstone Software. Usar os princípios de contraste, ritmo e tipografia; não copiar logotipo, imagens, textos ou estrutura promocional.
 
 ### Fonte — Inter via `next/font`
 
@@ -517,7 +528,7 @@ export const inter = Inter({
 
 Aplicar `inter.variable` no `<html>` (seção 3) e mapear `--font-sans` no tema. Sem request externo em runtime (self-hosted pelo `next/font`), coerente com o CSP restritivo e privacidade.
 
-### CSS variables (shadcn) — estritamente monocromático
+### CSS variables (shadcn) — estritamente monocromático e dark-first
 
 Todos os tons têm **chroma 0** (neutros puros). Valores em `oklch` (padrão shadcn v4). Declarar em `globals.css`:
 
@@ -528,24 +539,24 @@ Todos os tons têm **chroma 0** (neutros puros). Valores em `oklch` (padrão sha
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.75rem;                 /* base; cards usam rounded-lg/xl */
+  --radius: 1rem;                    /* cards rounded-2xl; controles rounded-full */
 
-  --background:            oklch(1 0 0);        /* #ffffff branco */
-  --foreground:            oklch(0.145 0 0);    /* quase preto */
+  --background:            oklch(0.115 0 0);    /* quase preto */
+  --foreground:            oklch(0.985 0 0);    /* quase branco */
 
-  --card:                  oklch(1 0 0);
-  --card-foreground:       oklch(0.145 0 0);
-  --popover:               oklch(1 0 0);
-  --popover-foreground:    oklch(0.145 0 0);
+  --card:                  oklch(0.15 0 0);
+  --card-foreground:       oklch(0.985 0 0);
+  --popover:               oklch(0.16 0 0);
+  --popover-foreground:    oklch(0.985 0 0);
 
-  --primary:               oklch(0.205 0 0);    /* preto suave (botões, done) */
-  --primary-foreground:    oklch(0.985 0 0);    /* quase branco */
+  --primary:               oklch(0.985 0 0);    /* branco: ações e estados fortes */
+  --primary-foreground:    oklch(0.115 0 0);
 
-  --secondary:             oklch(0.97 0 0);     /* cinza muito claro */
-  --secondary-foreground:  oklch(0.205 0 0);
+  --secondary:             oklch(0.21 0 0);
+  --secondary-foreground:  oklch(0.985 0 0);
 
-  --muted:                 oklch(0.97 0 0);     /* fundo hover da sidebar */
-  --muted-foreground:      oklch(0.556 0 0);    /* texto secundário cinza */
+  --muted:                 oklch(0.19 0 0);
+  --muted-foreground:      oklch(0.69 0 0);
 
   --accent:                oklch(0.97 0 0);
   --accent-foreground:     oklch(0.205 0 0);
@@ -553,12 +564,12 @@ Todos os tons têm **chroma 0** (neutros puros). Valores em `oklch` (padrão sha
   --destructive:           oklch(0.45 0 0);     /* mantido neutro (P&B); usar ícone/label p/ semântica */
   --destructive-foreground: oklch(0.985 0 0);
 
-  --border:                oklch(0.922 0 0);    /* linhas finas cinza claro */
-  --input:                 oklch(0.922 0 0);
+  --border:                oklch(1 0 0 / 14%);  /* linhas finas translúcidas */
+  --input:                 oklch(1 0 0 / 18%);
   --ring:                  oklch(0.708 0 0);    /* foco cinza */
 }
 
-.dark {
+.dark { /* variante escura compatível; mantida para componentes shadcn */
   --background:            oklch(0.145 0 0);    /* quase preto */
   --foreground:            oklch(0.985 0 0);
 
@@ -622,9 +633,9 @@ Todos os tons têm **chroma 0** (neutros puros). Valores em `oklch` (padrão sha
 }
 ```
 
-**Tokens de radius:** base `--radius: 0.75rem` ⇒ cards/inputs `rounded-lg`/`rounded-xl`; itens de navegação e badges `rounded-lg`/`rounded-md`. Uso generoso de whitespace: `p-6`/`p-8` nos containers de página, `gap-4` entre cards.
+**Tokens de radius:** base `--radius: 1rem`; cards usam `rounded-2xl`, enquanto botões, badges e itens de navegação ativos usam `rounded-full`. Containers usam `p-5` até `p-10`, com grids de `gap-3` e separação maior entre blocos editoriais.
 
-> **Modo escuro:** o MVP pode ficar só no light. Os tokens `.dark` já estão prontos caso se queira um toggle depois (via `next-themes`). O Storybook expõe ambos (seção 10). Como o app é P&B, dark é literalmente a inversão dos neutros.
+> **Modo de tema:** o produto usa tema escuro fixo nesta fase. Não exibir toggle sem que exista uma especificação completa para uma variante clara equivalente.
 
 > **Regra de "sem cor":** status, seleção e destaque são comunicados por **peso, contorno, preenchimento e opacidade** — nunca por matiz. Ícones `lucide-react` com `stroke-width` fino reforçam a estética.
 
@@ -895,7 +906,7 @@ npm run build
 
 **Pós-scaffold (implementação, fora do escopo de comandos):**
 
-1. Substituir o tema em `app/globals.css` pelos tokens P&B da seção 7 (chroma 0) e ajustar `--radius: 0.75rem`.
+1. Substituir o tema em `app/globals.css` pelos tokens dark-first da seção 7 (chroma 0) e ajustar `--radius: 1rem`.
 2. Criar `lib/fonts.ts` (Inter) e aplicar `inter.variable` no `<html>` de `app/layout.tsx`; montar o shell sidebar + main.
 3. Criar `lib/types.ts`, `lib/schema.ts`, `lib/pillars.ts`, `lib/content.ts` (seções 4–5).
 4. Criar componentes de `components/` (seção 6) e `actions/cards.ts` (seção 9).
@@ -914,7 +925,7 @@ npm run build
 - [ ] `content/<pilar>/<pagina>/*.md` com frontmatter validado por zod (seções 4–5).
 - [ ] Tipos `Card`/`Pillar`/`Page`/`Status` e schema zod conforme seção 5.
 - [ ] Componentes shadcn instalados + customizados criados (seção 6).
-- [ ] Tema P&B monocromático (chroma 0), Inter via `next/font`, `--radius: 0.75rem` (seção 7).
+- [ ] Tema dark-first editorial e monocromático (chroma 0), Inter via `next/font`, `--radius: 1rem` (seção 7).
 - [ ] Toggle Grid/Lista via query param, Server Components preservados (seção 8).
 - [ ] `saveCard` Server Action escreve `.md` via `gray-matter` + `revalidatePath` (seção 9); limitação FS/Vercel documentada.
 - [ ] Storybook 8 + `@storybook/nextjs` + stories dos componentes presentacionais (seção 10).

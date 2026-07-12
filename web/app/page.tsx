@@ -20,7 +20,7 @@ export default async function Home() {
     .slice(0, 4);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-8 p-6 md:p-8">
+    <div className="mx-auto flex max-w-[1500px] flex-col gap-10 p-5 md:p-8 lg:p-10">
       <PageHeader
         title="Visão geral"
         description="Como está seu negócio hoje e por onde continuar."

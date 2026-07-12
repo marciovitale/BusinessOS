@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { MobileSidebar } from "@/components/mobile-sidebar";
@@ -7,11 +7,9 @@ import { getPillars } from "@/lib/content";
 
 function Brand() {
   return (
-    <Link href="/" className="flex items-center gap-2 px-4 py-4 text-foreground">
-      <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <Sparkles className="size-4" strokeWidth={1.75} />
-      </span>
-      <span className="text-base font-semibold tracking-tight">BusinessOS</span>
+    <Link href="/" className="group flex items-center justify-between rounded-full border border-border px-4 py-3 text-foreground">
+      <span className="text-sm font-medium uppercase tracking-[-0.02em]">BusinessOS</span>
+      <ArrowUpRight className="size-4 transition-transform group-hover:rotate-45" strokeWidth={1.5} />
     </Link>
   );
 }
@@ -24,7 +22,7 @@ export async function AppSidebar() {
   return (
     <>
       {/* Desktop */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-background md:flex">
+      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-border bg-background/80 p-3 backdrop-blur-xl md:flex">
         <Brand />
         <ScrollArea className="flex-1">
           <div className="pb-6">

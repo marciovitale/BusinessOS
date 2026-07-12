@@ -30,7 +30,7 @@ export function StatusBadge({
   return (
     <Badge
       variant="outline"
-      className={cn("rounded-md", STATUS_CLASS[status], className)}
+      className={cn("rounded-full px-2.5 py-1 text-[9px] uppercase tracking-[0.13em]", STATUS_CLASS[status], className)}
       aria-label={`Status: ${STATUS_LABELS[status]}`}
     >
       {STATUS_LABELS[status]}
