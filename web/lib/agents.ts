@@ -12,6 +12,7 @@ export interface AgentDef {
   pages?: string[];
   scope?: "global";
   system: string;
+  createdBy: string;
 }
 
 function rowToAgent(row: {
@@ -22,6 +23,7 @@ function rowToAgent(row: {
   scope: string | null;
   pillar: string | null;
   pages: string[] | null;
+  created_by: string;
 }): AgentDef {
   return {
     id: row.id,
@@ -31,6 +33,7 @@ function rowToAgent(row: {
     pages: row.pages && row.pages.length > 0 ? row.pages : undefined,
     scope: row.scope === "global" ? "global" : undefined,
     system: row.system ?? "",
+    createdBy: row.created_by,
   };
 }
 

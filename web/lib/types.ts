@@ -32,6 +32,7 @@ export interface Frontmatter {
 // Card = frontmatter + corpo em Markdown (conteúdo do founder).
 export interface Card extends Frontmatter {
   body: string;
+  createdBy: string;
 }
 
 // Config estática de navegação.

@@ -7,6 +7,11 @@ import { NewCardButton } from "@/components/new-card";
 import { getCards } from "@/lib/content";
 import { findPage } from "@/lib/pillars";
 import { getSuggestions } from "@/lib/suggestions";
+import {
+  getActiveOrganizationId,
+  getCurrentUserId,
+  isOrgOwner,
+} from "@/lib/organization";
 import type { PillarSlug } from "@/lib/types";
 
 // Composição reusável usada por cada page.tsx (thin wrapper).
@@ -23,7 +28,12 @@ export async function PageView({
   if (!def) notFound();
 
   const mode = view === "list" ? "list" : "grid";
-  const cards = await getCards(pillar, page);
+  const [cards, currentUserId, organizationId] = await Promise.all([
+    getCards(pillar, page),
+    getCurrentUserId(),
+    getActiveOrganizationId(),
+  ]);
+  const owner = await isOrgOwner(organizationId);
   const suggestions = getSuggestions(pillar, page);
 
   return (
@@ -45,6 +55,8 @@ export async function PageView({
         view={mode}
         pillar={pillar}
         page={page}
+        currentUserId={currentUserId}
+        isOrgOwner={owner}
         empty={
           <EmptyState
             title={`Comece a preencher “${def.title}”`}

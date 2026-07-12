@@ -6,9 +6,31 @@ import { StatusBadge } from "@/components/status-badge";
 import { PageHeader } from "@/components/page-header";
 import { RecentCardRow } from "@/components/recent-card-row";
 import { ContextLintPanel } from "@/components/context-lint-panel";
+import { EmptyState } from "@/components/empty-state";
 import { getAllCards, getPillars } from "@/lib/content";
+import { getActiveOrganizationId } from "@/lib/organization";
 
 export default async function Home() {
+  const organizationId = await getActiveOrganizationId();
+
+  // Login bem-sucedido, mas nenhum convite foi aceito ainda: não há
+  // organização ativa para carregar cards/pilares — mostra estado amigável
+  // em vez das 4 colunas de pilares vazias sem contexto.
+  if (!organizationId) {
+    return (
+      <div className="mx-auto flex max-w-[1500px] flex-col gap-10 p-5 md:p-8 lg:p-10">
+        <PageHeader
+          title="Visão geral"
+          description="Como está seu negócio hoje e por onde continuar."
+        />
+        <EmptyState
+          title="Você ainda não faz parte de nenhuma organização"
+          description="Peça para um administrador (owner da organização ou administrador da plataforma) te convidar pelo seu e-mail de login. Assim que o convite for aceito no próximo login, seu BusinessOS aparece aqui."
+        />
+      </div>
+    );
+  }
+
   const [pillars, all] = await Promise.all([getPillars(), getAllCards()]);
   const totalCards = all.length;
   const isEmpty = totalCards === 0;

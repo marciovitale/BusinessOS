@@ -12,6 +12,7 @@ import {
 import { slugify } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganizationId } from "@/lib/organization";
+import { auth0 } from "@/lib/auth0";
 
 /**
  * Server Actions de escrita do BusinessOS — persistência em Postgres
@@ -22,6 +23,15 @@ async function requireOrganizationId(): Promise<string> {
   const organizationId = await getActiveOrganizationId();
   if (!organizationId) throw new Error("Nenhuma organização ativa para este usuário.");
   return organizationId;
+}
+
+// `created_by` é NOT NULL e a RLS de INSERT exige `created_by = current_user_id()`
+// (o `sub` do Auth0) — obtém o id da sessão atual para preencher o insert.
+async function requireUserId(): Promise<string> {
+  const session = await auth0.getSession();
+  const userId = session?.user.sub;
+  if (!userId) throw new Error("Sessão inválida: usuário não autenticado.");
+  return userId;
 }
 
 /**
@@ -74,6 +84,7 @@ export async function saveCard(input: SaveCardInput) {
 export async function createCard(input: CreateCardInput) {
   const data = createCardInput.parse(input);
   const organizationId = await requireOrganizationId();
+  const userId = await requireUserId();
   const supabase = createClient();
 
   const { data: existingRows, error: readError } = await supabase
@@ -109,6 +120,7 @@ export async function createCard(input: CreateCardInput) {
     order: maxOrder + 1,
     body: data.body ?? "",
     updated: new Date().toISOString().slice(0, 10),
+    created_by: userId,
   });
 
   if (error) throw new Error(error.message);

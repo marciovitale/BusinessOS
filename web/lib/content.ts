@@ -29,6 +29,7 @@ function rowToCard(row: {
   order: number;
   updated: string;
   body: string | null;
+  created_by: string;
 }): Card {
   return {
     id: row.id,
@@ -40,6 +41,7 @@ function rowToCard(row: {
     order: row.order,
     updated: row.updated,
     body: row.body ?? "",
+    createdBy: row.created_by,
   };
 }
 

@@ -10,13 +10,20 @@ export function CardGrid({
   empty,
   pillar,
   page,
+  currentUserId,
+  isOrgOwner = false,
 }: {
   cards: Card[];
   view?: "grid" | "list";
   empty?: ReactNode;
-  // Opcionais: quando presentes, cada card ganha ações de editar/excluir.
+  // Opcionais: quando presentes, cada card ganha ações de editar/excluir
+  // (se `canManage` for verdadeiro para aquele card).
   pillar?: PillarSlug;
   page?: string;
+  // Resolvidos uma vez no Server Component pai (sessão + `is_org_owner`) —
+  // aqui só combinamos com `card.createdBy` para decidir `canManage`.
+  currentUserId?: string | null;
+  isOrgOwner?: boolean;
 }) {
   if (cards.length === 0) {
     return <>{empty ?? <EmptyState title="Nenhum card ainda" />}</>;
@@ -31,7 +38,14 @@ export function CardGrid({
       )}
     >
       {cards.map((c) => (
-        <ContentCard key={c.id} card={c} view={view} pillar={pillar} page={page} />
+        <ContentCard
+          key={c.id}
+          card={c}
+          view={view}
+          pillar={pillar}
+          page={page}
+          canManage={isOrgOwner || (!!currentUserId && c.createdBy === currentUserId)}
+        />
       ))}
     </div>
   );

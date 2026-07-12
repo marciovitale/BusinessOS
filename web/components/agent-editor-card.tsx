@@ -22,7 +22,16 @@ const PILLAR_LABELS: Record<string, string> = {
 
 // Card de agente com controles individuais: editar o system prompt,
 // salvar (grava de volta no .md) ou descartar as alterações locais.
-export function AgentEditorCard({ agent }: { agent: AgentDef }) {
+export function AgentEditorCard({
+  agent,
+  canManage = true,
+}: {
+  agent: AgentDef;
+  // Resolvido no Server Component pai (criador do agente OU owner da
+  // organização ativa) — quando falso, os controles de edição ficam
+  // desabilitados para evitar clique que a RLS vai rejeitar mesmo assim.
+  canManage?: boolean;
+}) {
   const [title, setTitle] = useState(agent.title);
   const [savedTitle, setSavedTitle] = useState(agent.title);
   const [system, setSystem] = useState(agent.system);
@@ -79,6 +88,7 @@ export function AgentEditorCard({ agent }: { agent: AgentDef }) {
             aria-label="Nome do agente"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={!canManage}
             className="h-8 w-auto min-w-0 flex-1 border-transparent bg-transparent px-2 text-base font-medium shadow-none hover:border-input focus-visible:border-ring"
           />
           <Badge variant="outline" className="shrink-0">
@@ -90,6 +100,11 @@ export function AgentEditorCard({ agent }: { agent: AgentDef }) {
         {agent.description ? (
           <p className="text-sm text-muted-foreground">{agent.description}</p>
         ) : null}
+        {!canManage ? (
+          <p className="text-xs text-muted-foreground/70">
+            Somente quem criou este agente ou o owner da organização pode editá-lo.
+          </p>
+        ) : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
@@ -100,7 +115,7 @@ export function AgentEditorCard({ agent }: { agent: AgentDef }) {
             size="icon-sm"
             aria-label="Melhorar prompt com IA"
             title="Melhorar prompt com IA"
-            disabled={improving}
+            disabled={improving || !canManage}
             onClick={handleImprove}
           >
             <Wand2 className="size-3.5" strokeWidth={1.75} />
@@ -111,6 +126,7 @@ export function AgentEditorCard({ agent }: { agent: AgentDef }) {
           value={system}
           onChange={(e) => setSystem(e.target.value)}
           rows={12}
+          disabled={!canManage}
           className="font-mono text-xs"
         />
         <div className="flex justify-end gap-2 pt-1">
@@ -118,7 +134,7 @@ export function AgentEditorCard({ agent }: { agent: AgentDef }) {
             type="button"
             variant="outline"
             size="sm"
-            disabled={!dirty || pending}
+            disabled={!dirty || pending || !canManage}
             onClick={handleReset}
           >
             Descartar
@@ -126,7 +142,7 @@ export function AgentEditorCard({ agent }: { agent: AgentDef }) {
           <Button
             type="button"
             size="sm"
-            disabled={!dirty || pending}
+            disabled={!dirty || pending || !canManage}
             onClick={handleSave}
           >
             {pending ? "Salvando…" : "Salvar"}

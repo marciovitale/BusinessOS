@@ -22,6 +22,7 @@ export function makeCard(overrides: Partial<Card> = {}): Card {
     order: 0,
     updated: "2026-07-11",
     body: "",
+    createdBy: "user-exemplo",
     ...overrides,
   };
 }

@@ -35,20 +35,28 @@ function toPlainText(md: string): string {
 // - list: linha compacta (título/preview à esquerda, badge/updated/ações à direita)
 //
 // Compat: `card` e `view` mantêm a assinatura pública original. `pillar`/`page`
-// são props OPCIONAIS aditivas — quando ambas presentes, o card exibe as ações
-// de editar/excluir (CardActions). Sem elas, o card é puramente apresentacional
-// (ex.: stories), como antes.
+// são props OPCIONAIS aditivas — quando ambas presentes E `canManage` é `true`,
+// o card exibe as ações de editar/excluir (CardActions). Sem elas, o card é
+// puramente apresentacional (ex.: stories), como antes.
+//
+// `canManage` é resolvido no Server Component pai (quem criou o card OU é
+// owner da organização ativa) e chega aqui como prop simples — este
+// componente não decide autorização, só respeita o que recebeu.
 export function ContentCard({
   card,
   view = "grid",
   pillar,
   page,
+  canManage = false,
 }: {
   card: CardModel;
   view?: "grid" | "list";
   pillar?: PillarSlug;
   page?: string;
+  canManage?: boolean;
 }) {
+  const showActions = Boolean(pillar && page && canManage);
+
   if (view === "list") {
     return (
       <Card className="flex-row items-center justify-between gap-4 rounded-2xl px-5 py-4">
@@ -69,8 +77,8 @@ export function ContentCard({
           <time className="hidden text-xs text-muted-foreground sm:block">
             {card.updated}
           </time>
-          {pillar && page ? (
-            <CardActions card={card} pillar={pillar} page={page} />
+          {showActions ? (
+            <CardActions card={card} pillar={pillar!} page={page!} />
           ) : null}
         </div>
       </Card>
@@ -86,8 +94,8 @@ export function ContentCard({
           </h3>
           <div className="flex shrink-0 items-center gap-1">
             <StatusBadge status={card.status} />
-            {pillar && page ? (
-              <CardActions card={card} pillar={pillar} page={page} />
+            {showActions ? (
+              <CardActions card={card} pillar={pillar!} page={page!} />
             ) : null}
           </div>
         </div>

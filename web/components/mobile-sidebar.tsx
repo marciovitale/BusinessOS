@@ -5,6 +5,7 @@ import { Menu, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { UserFooter } from "@/components/user-footer";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { PillarSummary } from "@/lib/types";
 
 // Responsividade: em telas estreitas a sidebar colapsa num drawer acionável.
@@ -12,9 +13,11 @@ import type { PillarSummary } from "@/lib/types";
 export function MobileSidebar({
   pillars,
   user,
+  isPlatformAdmin = false,
 }: {
   pillars: PillarSummary[];
   user?: { name?: string; email?: string };
+  isPlatformAdmin?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -59,10 +62,17 @@ export function MobileSidebar({
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto px-2 pb-6">
-              <SidebarNav pillars={pillars} onNavigate={() => setOpen(false)} />
+              <SidebarNav
+                pillars={pillars}
+                isPlatformAdmin={isPlatformAdmin}
+                onNavigate={() => setOpen(false)}
+              />
             </div>
-            <div className="px-2 pb-3">
-              <UserFooter user={user} />
+            <div className="flex items-center gap-2 px-2 pb-3">
+              <div className="min-w-0 flex-1">
+                <UserFooter user={user} />
+              </div>
+              <ThemeToggle />
             </div>
           </aside>
         </div>

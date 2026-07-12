@@ -4,7 +4,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { MobileSidebar } from "@/components/mobile-sidebar";
 import { UserFooter } from "@/components/user-footer";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { getPillars } from "@/lib/content";
+import { getIsPlatformAdmin } from "@/lib/organization";
 import { auth0 } from "@/lib/auth0";
 
 function Brand() {
@@ -19,7 +21,11 @@ function Brand() {
 // Navegação lateral persistente, agrupada pelos 4 pilares.
 // Server Component (lê getPillars); o destaque do item ativo é client (NavLink).
 export async function AppSidebar() {
-  const [pillars, session] = await Promise.all([getPillars(), auth0.getSession()]);
+  const [pillars, session, isPlatformAdmin] = await Promise.all([
+    getPillars(),
+    auth0.getSession(),
+    getIsPlatformAdmin(),
+  ]);
   const user = session?.user;
 
   return (
@@ -29,14 +35,19 @@ export async function AppSidebar() {
         <Brand />
         <ScrollArea className="flex-1">
           <div className="pb-6">
-            <SidebarNav pillars={pillars} />
+            <SidebarNav pillars={pillars} isPlatformAdmin={isPlatformAdmin} />
           </div>
         </ScrollArea>
-        <UserFooter user={user} />
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <UserFooter user={user} />
+          </div>
+          <ThemeToggle />
+        </div>
       </aside>
 
       {/* Mobile */}
-      <MobileSidebar pillars={pillars} user={user} />
+      <MobileSidebar pillars={pillars} user={user} isPlatformAdmin={isPlatformAdmin} />
     </>
   );
 }

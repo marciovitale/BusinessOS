@@ -3,6 +3,11 @@ import { AgentEditorCard } from "@/components/agent-editor-card";
 import { NewAgentButton } from "@/components/new-agent-button";
 import { ViewToggle } from "@/components/view-toggle";
 import { listAgents } from "@/lib/agents";
+import {
+  getActiveOrganizationId,
+  getCurrentUserId,
+  isOrgOwner,
+} from "@/lib/organization";
 import { cn } from "@/lib/utils";
 
 export default async function AgentsPage({
@@ -12,7 +17,12 @@ export default async function AgentsPage({
 }) {
   const { view } = await searchParams;
   const mode = view === "list" ? "list" : "grid";
-  const agents = await listAgents();
+  const [agents, currentUserId, organizationId] = await Promise.all([
+    listAgents(),
+    getCurrentUserId(),
+    getActiveOrganizationId(),
+  ]);
+  const owner = await isOrgOwner(organizationId);
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 p-6 md:p-8">
@@ -36,7 +46,11 @@ export default async function AgentsPage({
         )}
       >
         {agents.map((agent) => (
-          <AgentEditorCard key={agent.id} agent={agent} />
+          <AgentEditorCard
+            key={agent.id}
+            agent={agent}
+            canManage={owner || agent.createdBy === currentUserId}
+          />
         ))}
       </div>
     </div>

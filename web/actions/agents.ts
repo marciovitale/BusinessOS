@@ -5,11 +5,21 @@ import { slugify } from "@/lib/utils";
 import type { AgentDef } from "@/lib/agents";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrganizationId } from "@/lib/organization";
+import { auth0 } from "@/lib/auth0";
 
 async function requireOrganizationId(): Promise<string> {
   const organizationId = await getActiveOrganizationId();
   if (!organizationId) throw new Error("Nenhuma organização ativa para este usuário.");
   return organizationId;
+}
+
+// `created_by` é NOT NULL e a RLS de INSERT exige `created_by = current_user_id()`
+// (o `sub` do Auth0) — obtém o id da sessão atual para preencher o insert.
+async function requireUserId(): Promise<string> {
+  const session = await auth0.getSession();
+  const userId = session?.user.sub;
+  if (!userId) throw new Error("Sessão inválida: usuário não autenticado.");
+  return userId;
 }
 
 // Grava o system prompt editado de volta na tabela `agents`, preservando
@@ -45,6 +55,7 @@ export async function createAgent(input: {
   system: string;
 }): Promise<{ id: string }> {
   const organizationId = await requireOrganizationId();
+  const userId = await requireUserId();
   const supabase = createClient();
 
   const { data: existingRows, error: readError } = await supabase
@@ -70,6 +81,7 @@ export async function createAgent(input: {
     description: input.description || null,
     system: input.system,
     scope: "global",
+    created_by: userId,
   });
 
   if (error) throw new Error(error.message);
