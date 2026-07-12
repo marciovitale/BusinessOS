@@ -37,7 +37,7 @@ export function NavLink({
         "flex items-center justify-between gap-2 rounded-full px-3 py-2 text-sm transition-colors",
         "hover:bg-sidebar-hover hover:text-sidebar-hover-foreground",
         active
-          ? "bg-foreground font-medium text-background"
+          ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground"
           : "text-muted-foreground",
       )}
     >
