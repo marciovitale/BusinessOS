@@ -1,8 +1,6 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
 import { cache } from "react";
-import { frontmatterSchema } from "@/lib/schema";
+import { createClient } from "@/lib/supabase/server";
+import { getActiveOrganizationId } from "@/lib/organization";
 import { PILLARS } from "@/lib/pillars";
 import type {
   Card,
@@ -11,9 +9,6 @@ import type {
   PillarSummary,
   Status,
 } from "@/lib/types";
-
-// `process.cwd()` é o root do projeto Next (`web/`), onde vive `content/`.
-const CONTENT_ROOT = path.join(process.cwd(), "content");
 
 // Ordenação de maturidade dos status (para status agregado por página).
 const STATUS_RANK: Record<Status, number> = {
@@ -24,53 +19,55 @@ const STATUS_RANK: Record<Status, number> = {
   done: 4,
 };
 
+function rowToCard(row: {
+  id: string;
+  pillar: string;
+  page: string;
+  title: string;
+  status: Status;
+  tags: string[] | null;
+  order: number;
+  updated: string;
+  body: string | null;
+}): Card {
+  return {
+    id: row.id,
+    pillar: row.pillar as PillarSlug,
+    page: row.page as Card["page"],
+    title: row.title,
+    status: row.status,
+    tags: row.tags ?? [],
+    order: row.order,
+    updated: row.updated,
+    body: row.body ?? "",
+  };
+}
+
 /**
- * Lê os cards de uma página `content/<pillar>/<page>/*.md`.
- * Nunca lança por causa de 1 arquivo inválido: loga e degrada (pula o arquivo).
+ * Lê os cards de uma página (organização ativa + pillar + page).
+ * Nunca lança por causa de erro de leitura: loga e degrada (retorna []).
  */
 export const getCards = cache(
   async (pillar: PillarSlug, page: string): Promise<Card[]> => {
-    const dir = path.join(CONTENT_ROOT, pillar, page);
-    let files: string[] = [];
-    try {
-      files = (await fs.readdir(dir)).filter((f) => f.endsWith(".md"));
-    } catch {
-      return []; // pasta ainda não existe -> página vazia
+    const organizationId = await getActiveOrganizationId();
+    if (!organizationId) return [];
+
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("cards")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .eq("pillar", pillar)
+      .eq("page", page);
+
+    if (error) {
+      console.warn(`[content] erro ao ler cards de ${pillar}/${page}:`, error.message);
+      return [];
     }
 
-    const cards = await Promise.all(
-      files.map(async (file) => {
-        try {
-          const raw = await fs.readFile(path.join(dir, file), "utf8");
-          const { data, content } = matter(raw);
-          const id = (data.id as string) ?? file.replace(/\.md$/, "");
-          const parsed = frontmatterSchema.safeParse({
-            ...data,
-            id,
-            pillar,
-            page,
-          });
-          if (!parsed.success) {
-            console.warn(
-              `[content] frontmatter inválido em ${pillar}/${page}/${file}:`,
-              parsed.error.flatten(),
-            );
-            return null;
-          }
-          return { ...parsed.data, body: content.trim() } as Card;
-        } catch (err) {
-          console.warn(
-            `[content] falha ao ler ${pillar}/${page}/${file}:`,
-            err,
-          );
-          return null;
-        }
-      }),
-    );
-
-    return (cards.filter(Boolean) as Card[]).sort(
-      (a, b) => a.order - b.order || a.title.localeCompare(b.title),
-    );
+    return (data ?? [])
+      .map(rowToCard)
+      .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
   },
 );
 
@@ -87,18 +84,25 @@ export const getCard = cache(
 );
 
 /**
- * Varre TODOS os `.md` de `content/**` e retorna todos os cards planos.
- * Fundação do futuro "export de contexto" para IA.
+ * Lê TODOS os cards da organização ativa.
+ * Fundação do "export de contexto" para IA.
  */
 export const getAllCards = cache(async (): Promise<Card[]> => {
-  const all: Card[] = [];
-  for (const pillar of PILLARS) {
-    for (const page of pillar.pages) {
-      const cards = await getCards(pillar.slug, page.slug as string);
-      all.push(...cards);
-    }
+  const organizationId = await getActiveOrganizationId();
+  if (!organizationId) return [];
+
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("cards")
+    .select("*")
+    .eq("organization_id", organizationId);
+
+  if (error) {
+    console.warn("[content] erro ao ler todos os cards:", error.message);
+    return [];
   }
-  return all;
+
+  return (data ?? []).map(rowToCard);
 });
 
 /** Status agregado/representativo de uma coleção de cards (maturidade máxima). */

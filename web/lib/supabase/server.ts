@@ -1,30 +1,18 @@
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { auth0 } from "@/lib/auth0";
 
 // Usar em Server Components / Server Actions / Route Handlers.
-// Precisa ser recriado a cada request (carrega os cookies da request atual).
-export async function createClient() {
-  const cookieStore = await cookies()
-
-  return createServerClient(
+// Auth0 é o Third-Party Auth do Supabase: não há sessão/cookie do Supabase
+// Auth aqui — cada request carrega o ID token da sessão Auth0 atual.
+export function createClient() {
+  return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
-            )
-          } catch {
-            // `setAll` chamado de um Server Component sem middleware — ignorável
-            // se houver refresh de sessão via middleware.
-          }
-        },
+      accessToken: async () => {
+        const session = await auth0.getSession();
+        return session?.tokenSet.idToken ?? null;
       },
     },
-  )
+  );
 }

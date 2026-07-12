@@ -4,11 +4,18 @@ import { useState } from "react";
 import { Menu, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarNav } from "@/components/sidebar-nav";
+import { UserFooter } from "@/components/user-footer";
 import type { PillarSummary } from "@/lib/types";
 
 // Responsividade: em telas estreitas a sidebar colapsa num drawer acionável.
 // Fecha ao navegar (onNavigate) — sem efeitos que chamem setState.
-export function MobileSidebar({ pillars }: { pillars: PillarSummary[] }) {
+export function MobileSidebar({
+  pillars,
+  user,
+}: {
+  pillars: PillarSummary[];
+  user?: { name?: string; email?: string };
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -53,6 +60,9 @@ export function MobileSidebar({ pillars }: { pillars: PillarSummary[] }) {
             </div>
             <div className="flex-1 overflow-y-auto px-2 pb-6">
               <SidebarNav pillars={pillars} onNavigate={() => setOpen(false)} />
+            </div>
+            <div className="px-2 pb-3">
+              <UserFooter user={user} />
             </div>
           </aside>
         </div>

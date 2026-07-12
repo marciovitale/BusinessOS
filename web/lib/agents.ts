@@ -1,38 +1,57 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
 import { cache } from "react";
+import { createClient } from "@/lib/supabase/server";
+import { getActiveOrganizationId } from "@/lib/organization";
 
-// Lê e faz parse dos agentes de IA definidos em web/agents/*.md.
-
-const AGENTS_ROOT = path.join(process.cwd(), "agents");
+// Lê e monta os agentes de IA da organização ativa (tabela `agents`).
 
 export interface AgentDef {
   id: string;
   title: string;
   description?: string;
   pillar?: string;
-  page?: string;
   pages?: string[];
   scope?: "global";
   system: string;
 }
 
+function rowToAgent(row: {
+  id: string;
+  title: string;
+  description: string | null;
+  system: string | null;
+  scope: string | null;
+  pillar: string | null;
+  pages: string[] | null;
+}): AgentDef {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description ?? undefined,
+    pillar: row.pillar ?? undefined,
+    pages: row.pages && row.pages.length > 0 ? row.pages : undefined,
+    scope: row.scope === "global" ? "global" : undefined,
+    system: row.system ?? "",
+  };
+}
+
 export const listAgents = cache(async (): Promise<AgentDef[]> => {
-  const files = await fs.readdir(AGENTS_ROOT);
-  const agents = await Promise.all(
-    files
-      .filter((f) => f.endsWith(".md"))
-      .map(async (file) => {
-        const raw = await fs.readFile(path.join(AGENTS_ROOT, file), "utf8");
-        const { data, content } = matter(raw);
-        return {
-          ...(data as Omit<AgentDef, "system">),
-          system: content.trim(),
-        };
-      }),
-  );
-  return agents.sort((a, b) => a.title.localeCompare(b.title));
+  const organizationId = await getActiveOrganizationId();
+  if (!organizationId) return [];
+
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("agents")
+    .select("*")
+    .eq("organization_id", organizationId);
+
+  if (error) {
+    console.warn("[agents] erro ao ler agents:", error.message);
+    return [];
+  }
+
+  return (data ?? [])
+    .map(rowToAgent)
+    .sort((a, b) => a.title.localeCompare(b.title));
 });
 
 // Agente especializado correspondente a um (pillar, page), quando existir.
@@ -42,7 +61,7 @@ export async function getAgentPrompt(
 ): Promise<{ title: string; system: string } | null> {
   const agents = await listAgents();
   const match = agents.find(
-    (a) => a.pillar === pillar && (a.page === page || a.pages?.includes(page)),
+    (a) => a.pillar === pillar && a.pages?.includes(page),
   );
   return match ? { title: match.title, system: match.system } : null;
 }

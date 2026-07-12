@@ -3,7 +3,9 @@ import { ArrowUpRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { MobileSidebar } from "@/components/mobile-sidebar";
+import { UserFooter } from "@/components/user-footer";
 import { getPillars } from "@/lib/content";
+import { auth0 } from "@/lib/auth0";
 
 function Brand() {
   return (
@@ -17,7 +19,8 @@ function Brand() {
 // Navegação lateral persistente, agrupada pelos 4 pilares.
 // Server Component (lê getPillars); o destaque do item ativo é client (NavLink).
 export async function AppSidebar() {
-  const pillars = await getPillars();
+  const [pillars, session] = await Promise.all([getPillars(), auth0.getSession()]);
+  const user = session?.user;
 
   return (
     <>
@@ -29,10 +32,11 @@ export async function AppSidebar() {
             <SidebarNav pillars={pillars} />
           </div>
         </ScrollArea>
+        <UserFooter user={user} />
       </aside>
 
       {/* Mobile */}
-      <MobileSidebar pillars={pillars} />
+      <MobileSidebar pillars={pillars} user={user} />
     </>
   );
 }
