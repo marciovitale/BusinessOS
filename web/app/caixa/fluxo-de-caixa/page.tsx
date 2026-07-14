@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageView } from "@/components/page-view";
 
 export const metadata: Metadata = {
-  title: "Fluxo de Caixa — Caixa · BusinessOS",
+  title: "Fluxo de Caixa — Caixa · AI2 - Business OS",
 };
 
 export default async function Page({

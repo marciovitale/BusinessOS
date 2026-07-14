@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageView } from "@/components/page-view";
 
-export const metadata: Metadata = { title: "Objetivo — Founder · BusinessOS" };
+export const metadata: Metadata = { title: "Objetivo — Founder · AI2 - Business OS" };
 
 export default async function Page({
   searchParams,

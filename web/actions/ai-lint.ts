@@ -26,7 +26,7 @@ export async function runContextLint(): Promise<string> {
     messages: [
       {
         role: "user",
-        content: `Todos os cards do BusinessOS:\n\n${context}`,
+        content: `Todos os cards do AI2 - Business OS:\n\n${context}`,
       },
     ],
   });

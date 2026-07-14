@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageView } from "@/components/page-view";
 
 export const metadata: Metadata = {
-  title: "Ímã de Problemas — Direção · BusinessOS",
+  title: "Ímã de Problemas — Direção · AI2 - Business OS",
 };
 
 export default async function Page({

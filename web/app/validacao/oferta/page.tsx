@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageView } from "@/components/page-view";
 
-export const metadata: Metadata = { title: "Oferta — Validação · BusinessOS" };
+export const metadata: Metadata = { title: "Oferta — Validação · AI2 - Business OS" };
 
 export default async function Page({
   searchParams,

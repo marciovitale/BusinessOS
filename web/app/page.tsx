@@ -25,7 +25,7 @@ export default async function Home() {
         />
         <EmptyState
           title="Você ainda não faz parte de nenhuma organização"
-          description="Peça para um administrador (owner da organização ou administrador da plataforma) te convidar pelo seu e-mail de login. Assim que o convite for aceito no próximo login, seu BusinessOS aparece aqui."
+          description="Peça para um administrador (owner da organização ou administrador da plataforma) te convidar pelo seu e-mail de login. Assim que o convite for aceito no próximo login, seu AI2 - Business OS aparece aqui."
         />
       </div>
     );

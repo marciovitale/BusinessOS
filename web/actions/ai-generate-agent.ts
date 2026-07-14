@@ -30,7 +30,7 @@ export async function generateAgent({
     model: "claude-opus-4-8",
     max_tokens: 2048,
     system:
-      "Você projeta agentes de IA especializados para o BusinessOS, uma ferramenta de planejamento " +
+      "Você projeta agentes de IA especializados para o AI2 - Business OS, uma ferramenta de planejamento " +
       "de negócio para founders solo. Dado o nome de um agente e um prompt inicial (rascunho ou objetivo) " +
       "escrito pelo usuário, gere: uma descrição de uma frase dizendo como o agente ajuda, e um system " +
       "prompt completo em português do Brasil que expanda o prompt inicial — incluindo foco (o que " +

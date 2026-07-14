@@ -28,7 +28,7 @@ export default async function AgentsPage({
     <div className="mx-auto flex max-w-6xl flex-col gap-8 p-6 md:p-8">
       <PageHeader
         title="Agentes"
-        description="Os agentes de IA especializados que ajudam a preencher e revisar o BusinessOS. Edite o nome e o system prompt de cada um e salve individualmente."
+        description="Os agentes de IA especializados que ajudam a preencher e revisar o AI2 - Business OS. Edite o nome e o system prompt de cada um e salve individualmente."
         count={agents.length}
         actions={
           <>

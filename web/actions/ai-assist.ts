@@ -36,7 +36,7 @@ export async function suggestCardDraft({
 
   const system = agent
     ? `${agent.system}\n\n${outputInstructions}`
-    : `Você é um assistente que ajuda um founder solo a preencher o BusinessOS, ` +
+    : `Você é um assistente que ajuda um founder solo a preencher o AI2 - Business OS, ` +
       `uma ferramenta de planejamento de negócio organizada em 4 pilares (Founder, Direção, Validação, Caixa). ` +
       `Pilar atual: "${pillarDef?.title ?? pillar}" — ${pillarDef?.description ?? ""}. ` +
       `Página atual: "${pageDef?.title ?? page}" — ${pageDef?.description ?? ""}. ` +

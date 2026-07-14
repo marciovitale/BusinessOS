@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageView } from "@/components/page-view";
 
-export const metadata: Metadata = { title: "ERP — Caixa · BusinessOS" };
+export const metadata: Metadata = { title: "ERP — Caixa · AI2 - Business OS" };
 
 export default async function Page({
   searchParams,
