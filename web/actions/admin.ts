@@ -4,15 +4,12 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { slugify } from "@/lib/utils";
 import { getCurrentUserId, getIsPlatformAdmin } from "@/lib/organization";
 
 const createOrganizationInput = z.object({
   name: z.string().min(1, "Nome obrigatório"),
-  slug: z
-    .string()
-    .min(1, "Slug obrigatório")
-    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Slug deve ser kebab-case"),
-  ownerEmail: z.string().email("E-mail inválido"),
+  description: z.string().optional().default(""),
 });
 export type CreateOrganizationInput = z.infer<typeof createOrganizationInput>;
 
@@ -25,55 +22,52 @@ async function requirePlatformAdmin(): Promise<string> {
 }
 
 /**
- * Cria uma nova organização + um convite pendente de `owner` para o e-mail
- * informado. Não há envio de e-mail real neste MVP: o convite fica
- * `pending` no banco e é aplicado automaticamente por `ensure_profile` no
- * próximo login dessa pessoa (ver `lib/auth0.ts`).
+ * Cria uma nova organização (sem owner/membro algum ainda — quem convida os
+ * membros é um passo separado do wizard de criação em `/admin`). A RLS de
+ * INSERT em `organizations` já exige `is_platform_admin()`.
+ *
+ * O slug é derivado do nome automaticamente (com sufixo aleatório em caso de
+ * colisão) porque o novo formulário de criação não expõe mais um campo de
+ * slug — só nome e descrição.
  */
-export async function createOrganizationWithOwner(input: CreateOrganizationInput) {
+export async function createOrganization(input: CreateOrganizationInput) {
   const data = createOrganizationInput.parse(input);
   const userId = await requirePlatformAdmin();
   const supabase = createClient();
 
   const organizationId = randomUUID();
+  const baseSlug = slugify(data.name) || "organizacao";
 
-  const { error: orgError } = await supabase.from("organizations").insert({
-    id: organizationId,
-    name: data.name,
-    slug: data.slug,
-    created_by: userId,
-  });
+  let slug = baseSlug;
+  let attempt = 0;
+  // Tenta o slug derivado do nome; em caso de colisão (23505), acrescenta um
+  // sufixo curto e tenta de novo, algumas vezes.
+  while (attempt < 5) {
+    const { error } = await supabase.from("organizations").insert({
+      id: organizationId,
+      name: data.name,
+      slug,
+      description: data.description ?? "",
+      created_by: userId,
+    });
 
-  if (orgError) {
-    if (orgError.code === "23505") {
-      throw new Error(`Já existe uma organização com o slug "${data.slug}".`);
+    if (!error) {
+      revalidatePath("/admin");
+      return {
+        ok: true as const,
+        organizationId,
+        organizationName: data.name,
+      };
     }
-    throw new Error(orgError.message);
+
+    if (error.code === "23505") {
+      attempt += 1;
+      slug = `${baseSlug}-${randomUUID().slice(0, 4)}`;
+      continue;
+    }
+
+    throw new Error(error.message);
   }
 
-  const { error: inviteError } = await supabase.from("organization_invites").insert({
-    organization_id: organizationId,
-    email: data.ownerEmail.toLowerCase(),
-    role: "owner",
-    invited_by: userId,
-    status: "pending",
-  });
-
-  if (inviteError) {
-    if (inviteError.code === "23505") {
-      throw new Error(
-        `Já existe um convite pendente para "${data.ownerEmail}" nesta organização.`,
-      );
-    }
-    throw new Error(inviteError.message);
-  }
-
-  revalidatePath("/admin");
-
-  return {
-    ok: true as const,
-    organizationId,
-    organizationName: data.name,
-    ownerEmail: data.ownerEmail,
-  };
+  throw new Error("Não foi possível gerar um slug único para a organização.");
 }

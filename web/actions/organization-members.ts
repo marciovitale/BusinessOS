@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUserId } from "@/lib/organization";
+import { sendInviteEmail } from "@/lib/send-invite-email";
 
 const roleEnum = z.enum(["owner", "member"]);
 
@@ -15,10 +16,15 @@ const inviteMemberInput = z.object({
 export type InviteMemberInput = z.infer<typeof inviteMemberInput>;
 
 /**
- * Cria um convite pendente para `email` entrar na organização. A RLS de
- * INSERT em `organization_invites` já exige `is_org_owner(organization_id)
- * OR is_platform_admin()` — deixamos o Postgres barrar quem não pode, só
+ * Cria um convite pendente para `email` entrar na organização e envia o
+ * e-mail de convite (Resend, remetente noreply@ai2.com.br). A RLS de INSERT
+ * em `organization_invites` já exige `is_org_owner(organization_id) OR
+ * is_platform_admin()` — deixamos o Postgres barrar quem não pode, só
  * traduzimos os erros mais comuns em mensagens amigáveis.
+ *
+ * Falha no ENVIO do e-mail não desfaz o convite (ele já está pendente no
+ * banco e será aplicado no próximo login de qualquer forma) — só é
+ * reportada de volta em `emailSent`/`emailError` para a UI avisar o owner.
  */
 export async function inviteMember(input: InviteMemberInput) {
   const data = inviteMemberInput.parse(input);
@@ -39,13 +45,28 @@ export async function inviteMember(input: InviteMemberInput) {
       throw new Error(`Já existe um convite pendente para "${data.email}".`);
     }
     if (error.code === "42501") {
-      throw new Error("Apenas o owner da organização pode convidar membros.");
+      throw new Error(
+        "Apenas o owner da organização ou um administrador da plataforma pode convidar membros.",
+      );
     }
     throw new Error(error.message);
   }
 
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("name")
+    .eq("id", data.organizationId)
+    .maybeSingle();
+
+  const emailResult = await sendInviteEmail({
+    email: data.email,
+    organizationName: org?.name ?? "sua organização",
+    role: data.role,
+  });
+
   revalidatePath("/organizacao");
-  return { ok: true as const };
+  revalidatePath(`/admin/${data.organizationId}`);
+  return { ok: true as const, emailSent: emailResult.sent, emailError: emailResult.error };
 }
 
 const revokeInviteInput = z.object({

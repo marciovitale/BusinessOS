@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, Sparkles, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { UserFooter } from "@/components/user-footer";
@@ -23,7 +23,9 @@ export function MobileSidebar({
 
   return (
     <div className="md:hidden">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+      {/* A marca (logo da org + BusinessOS) já aparece no AppHeader fixo
+          acima; esta faixa só precisa do gatilho de abrir a navegação. */}
+      <div className="flex items-center border-b border-border px-4 py-3">
         <Button
           variant="ghost"
           size="icon"
@@ -33,16 +35,10 @@ export function MobileSidebar({
         >
           <Menu className="size-5" strokeWidth={1.75} />
         </Button>
-        <span className="flex items-center gap-2 text-sm font-semibold">
-          <span className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Sparkles className="size-3.5" strokeWidth={1.75} />
-          </span>
-          BusinessOS
-        </span>
       </div>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex">
+        <div className="fixed inset-0 z-[60] flex">
           <button
             type="button"
             aria-label="Fechar navegação"
@@ -51,7 +47,7 @@ export function MobileSidebar({
           />
           <aside className="relative z-10 flex h-full w-64 flex-col border-r border-border bg-background">
             <div className="flex items-center justify-between px-4 py-3">
-              <span className="text-sm font-semibold">BusinessOS</span>
+              <span className="text-sm font-semibold">AI2 - Business OS</span>
               <Button
                 variant="ghost"
                 size="icon"

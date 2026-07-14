@@ -19,6 +19,19 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
   }
 
+  // Silently refresh the token set (access + ID token) when near/at expiry and
+  // persist it onto `response`'s cookies. Server Components/Actions later in
+  // this request only ever call `getSession()` and can't set cookies
+  // themselves — without this, the ID token we forward to Supabase (Third-
+  // Party Auth) goes stale, and every RLS-protected call starts returning 401
+  // once it expires, even though the user still "feels" logged in.
+  try {
+    await auth0.getAccessToken(request, response);
+  } catch (error) {
+    console.error("[auth0] token refresh failed, forcing re-login:", error);
+    return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
+  }
+
   return response;
 }
 

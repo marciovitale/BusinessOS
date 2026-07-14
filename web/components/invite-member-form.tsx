@@ -42,10 +42,16 @@ export function InviteMemberForm({ organizationId }: { organizationId: string })
   function handleSubmit() {
     startTransition(async () => {
       try {
-        await inviteMember({ organizationId, email, role });
-        toast.success(
-          `Convite enviado para ${email} — quando essa pessoa fizer login, entra como ${role === "owner" ? "owner" : "member"}. Compartilhe o link de login com ela manualmente por enquanto.`,
-        );
+        const result = await inviteMember({ organizationId, email, role });
+        if (result.emailSent) {
+          toast.success(`Convite enviado por e-mail para ${email}.`);
+        } else {
+          toast.warning(
+            `Convite criado para ${email}, mas o e-mail não pôde ser enviado` +
+              (result.emailError ? ` (${result.emailError})` : "") +
+              ". Compartilhe o link de login manualmente por enquanto.",
+          );
+        }
         setOpen(false);
         reset();
         router.refresh();
@@ -69,8 +75,8 @@ export function InviteMemberForm({ organizationId }: { organizationId: string })
           <DialogHeader>
             <DialogTitle>Convidar membro</DialogTitle>
             <DialogDescription>
-              O convite fica pendente até a pessoa fazer login com este e-mail —
-              não há envio de e-mail automático neste MVP.
+              Um e-mail de convite é enviado para este endereço; o convite fica pendente
+              até a pessoa fazer login com este mesmo e-mail.
             </DialogDescription>
           </DialogHeader>
 
