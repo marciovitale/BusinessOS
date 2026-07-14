@@ -1,6 +1,6 @@
 import { getDocumentProxy, extractText as extractPdfText } from "unpdf";
 import mammoth from "mammoth";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { getAnthropicClient } from "@/lib/anthropic-client";
 
 // Extração de texto para o pipeline de ingestão (RAG). Cada formato vira uma
@@ -10,7 +10,11 @@ import { getAnthropicClient } from "@/lib/anthropic-client";
 // - texto puro / markdown / csv: lidos diretamente como string.
 // - PDF: `unpdf` (build serverless do pdf.js, sem dependência nativa).
 // - Word (.docx): `mammoth` (extractRawText).
-// - Planilhas (.xlsx/.xls): `xlsx` (SheetJS) — cada aba vira um bloco CSV.
+// - Planilhas (.xlsx/.xls): `exceljs` — cada aba vira um bloco de texto
+//   tipo CSV. (Não usamos `xlsx`/SheetJS: a versão publicada no npm tem 2
+//   vulnerabilidades altas sem correção lá — a corrigida só existe no CDN
+//   deles, que fica atrás de um desafio anti-bot da Cloudflare e bloqueia
+//   o build da Vercel.)
 // - Imagens: descritas em detalhe por um modelo de visão (Claude), e a
 //   DESCRIÇÃO é o texto indexado — não há OCR neste MVP.
 // - Áudio/vídeo: transcritos via Whisper (OpenAI) — a API de transcrição
@@ -70,14 +74,35 @@ async function extractFromDocx(file: File): Promise<string> {
   return value.trim();
 }
 
+function cellToText(value: ExcelJS.CellValue): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "object") {
+    // Rich text, fórmulas (usa o resultado) e datas viram string simples.
+    if ("text" in value && typeof value.text === "string") return value.text;
+    if ("result" in value) return String(value.result ?? "");
+    if (value instanceof Date) return value.toISOString().slice(0, 10);
+    if ("richText" in value && Array.isArray(value.richText)) {
+      return value.richText.map((r) => r.text).join("");
+    }
+    return String(value);
+  }
+  return String(value);
+}
+
 async function extractFromSpreadsheet(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const workbook = XLSX.read(buffer, { type: "buffer" });
+  const buffer = await file.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer);
+
   const parts: string[] = [];
-  for (const sheetName of workbook.SheetNames) {
-    const sheet = workbook.Sheets[sheetName];
-    const csv = XLSX.utils.sheet_to_csv(sheet).trim();
-    if (csv) parts.push(`### Planilha: ${sheetName}\n${csv}`);
+  for (const sheet of workbook.worksheets) {
+    const rows: string[] = [];
+    sheet.eachRow((row) => {
+      const values = (row.values as ExcelJS.CellValue[]).slice(1);
+      rows.push(values.map((v) => cellToText(v)).join(","));
+    });
+    const csv = rows.join("\n").trim();
+    if (csv) parts.push(`### Planilha: ${sheet.name}\n${csv}`);
   }
   return parts.join("\n\n").trim();
 }
