@@ -19,14 +19,23 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
   }
 
-  // Silently refresh the token set (access + ID token) when near/at expiry and
-  // persist it onto `response`'s cookies. Server Components/Actions later in
-  // this request only ever call `getSession()` and can't set cookies
-  // themselves — without this, the ID token we forward to Supabase (Third-
-  // Party Auth) goes stale, and every RLS-protected call starts returning 401
-  // once it expires, even though the user still "feels" logged in.
+  // Force a token refresh on every request and persist it onto `response`'s
+  // cookies. Server Components/Actions later in this request only ever call
+  // `getSession()` and can't set cookies themselves.
+  //
+  // `refresh: true` is required here, not optional: the SDK's own
+  // "refresh if near expiry" check (the default when this flag is omitted)
+  // looks ONLY at the ACCESS token's `expiresAt` — never the ID token's. The
+  // ID token is what we forward to Supabase (Third-Party Auth), and Auth0
+  // lets the two have different lifetimes. Once the ID token outlives its
+  // own (shorter) expiry while the access token is still "fresh enough",
+  // the SDK sees no reason to refresh, the ID token we send stays stale, and
+  // every RLS-protected call starts returning 401 — silently, since the user
+  // still "feels" logged in. Confirmed by reading getTokenSet() in the SDK:
+  // `if (options.refresh || expiresAt === undefined || shouldRefresh)` only
+  // computes `shouldRefresh` off the access token.
   try {
-    await auth0.getAccessToken(request, response);
+    await auth0.getAccessToken(request, response, { refresh: true });
   } catch (error) {
     console.error("[auth0] token refresh failed, forcing re-login:", error);
     return NextResponse.redirect(new URL("/auth/login", request.nextUrl));
